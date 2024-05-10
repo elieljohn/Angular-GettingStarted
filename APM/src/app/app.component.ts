@@ -10,6 +10,10 @@ import { Component } from '@angular/core';
       <li><a class='nav-link' routerLink='/products'>Product List</a></li>
     </ul>
   </nav>
+  <div class='container'>
+    <!-- <router-outlet> displays the appropriate component based on the URL and the path as specified in RouterModule.forRoot[] -->
+    <router-outlet></router-outlet>
+  </div>
   `
 })
 export class AppComponent {
