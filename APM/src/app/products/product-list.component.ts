@@ -1,4 +1,5 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnDestroy, OnInit } from "@angular/core";
+import { Subscription } from "rxjs";
 import { IProduct } from "./product";
 import { ProductService } from "./product.service";
 
@@ -7,11 +8,13 @@ import { ProductService } from "./product.service";
   templateUrl: './product-list.component.html',
   styleUrls: ['./product-list.component.css']
 })
-export class ProductListComponent implements OnInit {
+export class ProductListComponent implements OnInit, OnDestroy {
   pageTitle: string = 'Product List'
   imageWidth: number = 50;
   imageMargin: number = 2;
   showImage: boolean = false;
+  errorMessage: string = '';
+  sub!: Subscription;
 
   private _listFilter: string = '';
   get listFilter(): string {
@@ -39,8 +42,19 @@ export class ProductListComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.products = this.productService.getProducts();  // Call get products and assign the results to the 'products' property
-    this.filteredProducts = this.products;  // Assign the array stored in 'products' to the 'filteredProducts' property
+    // Call 'getProducts()' and subscribes to the resulting observable
+    this.sub = this.productService.getProducts().subscribe({
+      // Assign the emitted 'products' to 'this.products' and 'this.filteredProducts'
+      next: products => {
+        this.products = products;
+        this.filteredProducts = this.products;
+      },
+      error: err => this.errorMessage = err // Assigns the error message to 'this.errorMessage' if an error occurs
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.sub.unsubscribe(); // Terminate the subscription when the component is destroyed
   }
 
   onRatingClicked(message: string): void {
